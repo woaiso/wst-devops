@@ -35,6 +35,7 @@ services:
     depends_on:
       - mongodb
       - api
+      - image
     links:
       - api
       - image
