@@ -20,6 +20,12 @@ services:
     ports:
       - 27017:27017
 
+  image:
+    container_name: api-image
+    image: woaiso/wst-image
+    ports:
+      - 5000:5000
+
   nginx:
     container_name: nginx
     image: woaiso/docker-tengine
@@ -31,6 +37,7 @@ services:
       - api
     links:
       - api
+      - image
     ports:
       - '80:80'
       - '443:443'
