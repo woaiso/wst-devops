@@ -2,8 +2,8 @@ server {
   listen 80;
   listen 443 ssl http2;
   server_name dribbble.woaiso.com;
-  ssl_certificate /data/ssl/fullchain1.pem;
-  ssl_certificate_key /data/ssl/privkey1.pem;
+  ssl_certificate /data/ssl/woaiso/fullchain1.pem;
+  ssl_certificate_key /data/ssl/woaiso/privkey1.pem;
   location / {
         root /data/www/dribbble;
         # 用于配合 browserHistory使用
