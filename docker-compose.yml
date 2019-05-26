@@ -32,6 +32,7 @@ services:
     volumes:
       - ./sites_conf:/data/sites_conf
       - ./www:/data/www
+      - ./ssl:/data/ssl
     depends_on:
       - mongodb
       - api
