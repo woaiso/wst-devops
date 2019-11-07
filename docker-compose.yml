@@ -37,9 +37,20 @@ services:
       - mongodb
       - api
       - image
+      - registry
     links:
       - api
       - image
+      - registry
     ports:
       - '80:80'
       - '443:443'
+  registry:
+    container_name: registry-hub
+    image: registry:2
+    volumes:
+      - ./registry:/var/lib/registry
+    ports:
+      - 5001:5001
+    environment:
+      - REGISTRY_HTTP_ADDR=0.0.0.0:5001
