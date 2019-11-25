@@ -28,9 +28,9 @@ services:
 
   nginx:
     container_name: nginx
-    image: woaiso/docker-tengine
+    image: docker-tengine:2.0.2
     volumes:
-      - ./sites_conf:/data/sites_conf
+      - ./sites_conf:/etc/nginx/sites-enabled
       - ./www:/data/www
       - ./ssl:/data/ssl
     depends_on:
