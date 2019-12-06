@@ -2,4 +2,4 @@
 woaiso devops
 
 
-自动化部署 nginx node-server mongodb
+自动化部署 nginx(Tengine) node-server mongodb redis elk(ElasticSearch、Logstash、Kibana)
