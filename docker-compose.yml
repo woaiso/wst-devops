@@ -33,6 +33,7 @@ services:
       - ./sites_conf:/etc/nginx/sites-enabled
       - ./www:/data/www
       - ./ssl:/data/ssl
+      - ./logs/nginx:/var/log/nginx
     depends_on:
       - mongodb
       - api
@@ -116,6 +117,19 @@ services:
       - elk
     depends_on:
       - elasticsearch
+  filebeat:
+    build:
+      context: filebeat/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    command: filebeat -e -strict.perms=false
+    volumes:
+      #Mount the filebeat configuration readonly
+      - ./filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      #Mount the docker logs for indexing by the custom prospector ./config/filebeat/prospectors.d
+      - /var/lib/docker/containers:/var/lib/docker/containers
+    networks: :
+      - elk
 networks:
   elk:
     driver: bridge
