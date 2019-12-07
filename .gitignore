@@ -2,3 +2,4 @@ database
 ssl/
 www/
 registry/
+logs/

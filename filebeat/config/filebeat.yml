@@ -1,0 +1,8 @@
+filebeat.path: /usr/share/filebeat/data/registry
+filebeat.modules:
+- module: nginx
+  access:
+    var.paths: ["/var/log/nginx/access.log*"]
+#All data to indexed to Elasticsearch
+output.elasticsearch:
+    hosts: ["elasticsearch:9200"]
