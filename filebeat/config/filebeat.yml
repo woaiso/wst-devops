@@ -19,5 +19,13 @@ output.elasticsearch:
     username: "${ELASTICSEARCH_USER}"
     password: "${ELASTICSEARCH_PASSWORD}"
 
+output.logstash:
+    enabled: true
+    hosts: ["logstash:5000"]
+    backoff.init: 3
+    backoff.max: 60
+    bulk_max_size: 16384
+    ssl.enabled: false
+
 setup.template.name: "filebeat"
 setup.template.pattern: "filebeat-*"
