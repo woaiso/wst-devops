@@ -58,6 +58,8 @@ services:
 
   #ELK
   elasticsearch:
+    container_name: elasticsearch
+    hostname: elasticsearch
     build:
       context: elasticsearch/
       args:
@@ -73,12 +75,17 @@ services:
     ports:
       - "9200:9200"
       - "9300:9300"
+    #Healthcheck to confirm availability of ES. Other containers wait on this.
+    healthcheck:
+      test: ["CMD", "curl","-s" ,"-f", "-u", "elastic:${ES_PASSWORD}", "http://localhost:9200/_cat/health"]
     environment:
       ES_JAVA_OPTS: "-Xmx256m -Xms256m"
-      ELASTIC_PASSWORD: changeme
+      ELASTIC_PASSWORD: ${ES_PASSWORD}
     networks:
       - elk
   logstash:
+    container_name: logstash
+    hostname: logstash
     build:
       context: logstash/
       args:
@@ -96,12 +103,16 @@ services:
       - "4000:5000"
       - "9600:9600"
     environment:
-      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+      - "LS_JAVA_OPTS=-Xmx256m -Xms256m"
+      - "ELASTICSEARCH_USER=${ES_USER}"
+      - "ELASTICSEARCH_PASSWORD=${ES_PASSWORD}"
     networks:
       - elk
     depends_on:
       - elasticsearch
   kibana:
+    container_name: kibana
+    hostname: kibana
     build:
       context: kibana/
       args:
@@ -117,23 +128,39 @@ services:
       - elk
     depends_on:
       - elasticsearch
+    restart: on-failure
+    environment:
+      - "ELASTICSEARCH_USER=${ES_USER}"
+      - "ELASTICSEARCH_PASSWORD=${ES_PASSWORD}"
+    healthcheck:
+      test: ["CMD", "curl", "-s", "-f", "http://localhost:5601/login"]
+      retries: 6
   filebeat:
+    container_name: filebeat
+    hostname: filebeat
+    user: root
     build:
       context: filebeat/
       args:
         ELK_VERSION: $ELK_VERSION
-    command: filebeat -e -E output.elasticsearch.username=elastic -E output.elasticsearch.password=${ES_PASSWORD} -strict.perms=false
+    command: filebeat -e -E output.elasticsearch.username=${ES_USER} -E output.elasticsearch.password=${ES_PASSWORD} -strict.perms=false
     volumes:
       #Mount the filebeat configuration readonly
       - ./filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
       #Mount the docker logs for indexing by the custom prospector ./config/filebeat/prospectors.d
       - /var/lib/docker/containers:/var/lib/docker/containers
+      #Mount the nginx logs into the filebeat container so we can access and index them using the filebeat nginx module
+      - ./logs/nginx/:/var/log/nginx/
     networks:
       - elk
     depends_on:
       #wait for the these services to come up. This ensures the logs are available and ES exists for indexing
       - elasticsearch
       - nginx
+    restart: on-failure
+    environment:
+      - "ELASTICSEARCH_USER=${ES_USER}"
+      - "ELASTICSEARCH_PASSWORD=${ES_PASSWORD}"
 networks:
   elk:
     driver: bridge

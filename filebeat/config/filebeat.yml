@@ -1,8 +1,23 @@
-filebeat.path: /usr/share/filebeat/data/registry
+filebeat.config:
+    inputs:
+      enabled: true
+    modules:
+      enabled: true
+
 filebeat.modules:
 - module: nginx
   access:
+    enabled: true
     var.paths: ["/var/log/nginx/access.log*"]
+  error:
+    enabled: true
+    var.paths: ["/var/log/nginx/error.log*"]
 #All data to indexed to Elasticsearch
 output.elasticsearch:
     hosts: ["elasticsearch:9200"]
+    index: "filebeat-%{[agent.version]}-%{+yyyy.MM.dd}"
+    username: "${ELASTICSEARCH_USER}"
+    password: "${ELASTICSEARCH_PASSWORD}"
+
+setup.template.name: "filebeat"
+setup.template.pattern: "filebeat-*"
