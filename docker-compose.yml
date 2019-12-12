@@ -170,6 +170,7 @@ services:
       #wait for the these services to come up. This ensures the logs are available and ES exists for indexing
       - elasticsearch
       - nginx
+      - logstash
     restart: on-failure
     environment:
       - "ELASTICSEARCH_USER=${ES_USER}"
