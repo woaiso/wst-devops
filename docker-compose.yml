@@ -35,6 +35,7 @@ services:
       - woaiso
   nginx:
     container_name: nginx
+    hostname: nginx
     image: woaiso/docker-tengine:2.0.3
     volumes:
       - ./sites_conf:/etc/nginx/sites-enabled
@@ -153,13 +154,13 @@ services:
     hostname: filebeat
     user: root
     build:
-      context: filebeat/
+      context: beats/filebeat/
       args:
         ELK_VERSION: $ELK_VERSION
     command: filebeat -e -E output.elasticsearch.username=${ES_USER} -E output.elasticsearch.password=${ES_PASSWORD} -strict.perms=false
     volumes:
       #Mount the filebeat configuration readonly
-      - ./filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - ./beats/filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
       #Mount the docker logs for indexing by the custom prospector ./config/filebeat/prospectors.d
       - /var/lib/docker/containers:/var/lib/docker/containers
       #Mount the nginx logs into the filebeat container so we can access and index them using the filebeat nginx module
@@ -175,6 +176,17 @@ services:
     environment:
       - "ELASTICSEARCH_USER=${ES_USER}"
       - "ELASTICSEARCH_PASSWORD=${ES_PASSWORD}"
+
+# MetricBeat
+  metricbeat:
+    container_name: metricbeat
+    hostname: metricbeat
+    build: 
+      context: beats/metricbeat/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    volumes:
+      - ./beats/metricbeat/config/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro
 networks:
   woaiso:
     driver: bridge
