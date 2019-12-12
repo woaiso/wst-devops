@@ -36,7 +36,7 @@ services:
   nginx:
     container_name: nginx
     hostname: nginx
-    image: woaiso/docker-tengine:2.0.3
+    image: woaiso/docker-tengine:2.0.4
     volumes:
       - ./sites_conf:/etc/nginx/sites-enabled
       - ./www:/data/www
@@ -181,12 +181,30 @@ services:
   metricbeat:
     container_name: metricbeat
     hostname: metricbeat
+    user: root
     build: 
       context: beats/metricbeat/
       args:
         ELK_VERSION: $ELK_VERSION
     volumes:
       - ./beats/metricbeat/config/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro
+      - ./beats/metricbeat/config/modules.d/:/usr/share/metricbeat/modules.d/
+      - /proc:/hostfs/proc:ro
+      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
+      #Allows us to report on docker from the hosts information
+      - /var/run/docker.sock:/var/run/docker.sock
+      #We mount the host filesystem so we can report on disk usage with the system module
+      - /:/hostfs:ro
+    command: metricbeat -e -system.hostfs=/hostfs -E output.elasticsearch.username=${ES_USER} -E output.elasticsearch.password=${ES_PASSWORD} -strict.perms=false
+    networks:
+      - woaiso
+    restart: on-failure
+    depends_on:
+      #wait for the these services to come up. This ensures the logs are available and ES exists for indexing
+      - elasticsearch
+    environment:
+      - "ELASTICSEARCH_USER=${ES_USER}"
+      - "ELASTICSEARCH_PASSWORD=${ES_PASSWORD}"
 networks:
   woaiso:
     driver: bridge
