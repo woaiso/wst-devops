@@ -12,20 +12,23 @@ filebeat.modules:
   error:
     enabled: true
     var.paths: ["/var/log/nginx/error.log*"]
+
 #All data to indexed to Elasticsearch
 output.elasticsearch:
     hosts: ["elasticsearch:9200"]
     index: "filebeat-%{[agent.version]}-%{+yyyy.MM.dd}"
     username: "${ELASTICSEARCH_USER}"
     password: "${ELASTICSEARCH_PASSWORD}"
+    enabled: false #disabled
 
-# output.logstash:
-#     enabled: true
-#     hosts: ["logstash:5000"]
-#     backoff.init: 3
-#     backoff.max: 60
-#     bulk_max_size: 16384
-#     ssl.enabled: false
+# Out put to logstash
+output.logstash:
+    enabled: true
+    hosts: ["logstash:5000"]
+    backoff.init: 3
+    backoff.max: 60
+    bulk_max_size: 16384
+    ssl.enabled: false
 
 setup.template.name: "filebeat"
 setup.template.pattern: "filebeat-*"
