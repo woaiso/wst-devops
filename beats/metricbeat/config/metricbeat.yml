@@ -9,3 +9,8 @@ output.elasticsearch:
     username: "${ELASTICSEARCH_USER}"
     password: "${ELASTICSEARCH_PASSWORD}"
 logging.to_files: false
+setup.dashboards.enabled: true
+setup.kibana:
+  host: "kibana:5601"
+  username: "${ELASTICSEARCH_USER}"
+  password: "${ELASTICSEARCH_PASSWORD}"
