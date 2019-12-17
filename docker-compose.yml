@@ -13,8 +13,8 @@ services:
     environment:
       - PORT=7001
     networks:
-      - woaiso    
-    
+      - woaiso
+
   mongodb:
     container_name: api-mongodb
     hostname: mongodb
@@ -25,6 +25,11 @@ services:
       - 27017:27017
     networks:
       - woaiso
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongo mongo:27017/test --quiet 1
+      interval: 10s
+      timeout: 10s
+      retries: 5
   image:
     container_name: api-image
     hostname: image
@@ -87,13 +92,22 @@ services:
         source: elasticsearch
         target: /usr/share/elasticsearch/data
     ports:
-      - "9200:9200"
-      - "9300:9300"
+      - '9200:9200'
+      - '9300:9300'
     #Healthcheck to confirm availability of ES. Other containers wait on this.
     healthcheck:
-      test: ["CMD", "curl","-s" ,"-f", "-u", "elastic:${ES_PASSWORD}", "http://localhost:9200/_cat/health"]
+      test:
+        [
+          'CMD',
+          'curl',
+          '-s',
+          '-f',
+          '-u',
+          'elastic:${ES_PASSWORD}',
+          'http://localhost:9200/_cat/health',
+        ]
     environment:
-      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+      ES_JAVA_OPTS: '-Xmx256m -Xms256m'
       ELASTIC_PASSWORD: ${ES_PASSWORD}
     networks:
       - woaiso
@@ -114,12 +128,12 @@ services:
         target: /usr/share/logstash/pipeline
         read_only: true
     ports:
-      - "4000:5000"
-      - "9600:9600"
+      - '4000:5000'
+      - '9600:9600'
     environment:
-      - "LS_JAVA_OPTS=-Xmx256m -Xms256m"
-      - "ELASTICSEARCH_USER=${ES_USER}"
-      - "ELASTICSEARCH_PASSWORD=${ES_PASSWORD}"
+      - 'LS_JAVA_OPTS=-Xmx256m -Xms256m'
+      - 'ELASTICSEARCH_USER=${ES_USER}'
+      - 'ELASTICSEARCH_PASSWORD=${ES_PASSWORD}'
     networks:
       - woaiso
     depends_on:
@@ -137,17 +151,17 @@ services:
         target: /usr/share/kibana/config/kibana.yml
         read_only: true
     ports:
-      - "5601:5601"
+      - '5601:5601'
     networks:
       - woaiso
     depends_on:
       - elasticsearch
     restart: on-failure
     environment:
-      - "ELASTICSEARCH_USER=${ES_USER}"
-      - "ELASTICSEARCH_PASSWORD=${ES_PASSWORD}"
+      - 'ELASTICSEARCH_USER=${ES_USER}'
+      - 'ELASTICSEARCH_PASSWORD=${ES_PASSWORD}'
     healthcheck:
-      test: ["CMD", "curl", "-s", "-f", "http://localhost:5601/login"]
+      test: ['CMD', 'curl', '-s', '-f', 'http://localhost:5601/login']
       retries: 6
   filebeat:
     container_name: filebeat
@@ -171,18 +185,17 @@ services:
       #wait for the these services to come up. This ensures the logs are available and ES exists for indexing
       - elasticsearch
       - nginx
-      - logstash
     restart: on-failure
     environment:
-      - "ELASTICSEARCH_USER=${ES_USER}"
-      - "ELASTICSEARCH_PASSWORD=${ES_PASSWORD}"
+      - 'ELASTICSEARCH_USER=${ES_USER}'
+      - 'ELASTICSEARCH_PASSWORD=${ES_PASSWORD}'
 
-# MetricBeat
+  # MetricBeat
   metricbeat:
     container_name: metricbeat
     hostname: metricbeat
     user: root
-    build: 
+    build:
       context: beats/metricbeat/
       args:
         ELK_VERSION: $ELK_VERSION
@@ -202,9 +215,10 @@ services:
     depends_on:
       #wait for the these services to come up. This ensures the logs are available and ES exists for indexing
       - elasticsearch
+      - nginx
     environment:
-      - "ELASTICSEARCH_USER=${ES_USER}"
-      - "ELASTICSEARCH_PASSWORD=${ES_PASSWORD}"
+      - 'ELASTICSEARCH_USER=${ES_USER}'
+      - 'ELASTICSEARCH_PASSWORD=${ES_PASSWORD}'
 networks:
   woaiso:
     driver: bridge
