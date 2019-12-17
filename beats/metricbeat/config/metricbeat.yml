@@ -11,6 +11,9 @@ output.elasticsearch:
     password: "${ELASTICSEARCH_PASSWORD}"
     enabled: true #enabled
 
+setup.template.name: "metricbeat"
+setup.template.pattern: "metricbeat-*"
+
 logging.to_files: false
 setup.dashboards.enabled: true
 setup.kibana:
