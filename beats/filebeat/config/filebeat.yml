@@ -32,3 +32,9 @@ output.logstash:
 
 setup.template.name: "filebeat"
 setup.template.pattern: "filebeat-*"
+
+setup.dashboards.enabled: true
+setup.kibana:
+  host: "kibana:5601"
+  username: "${ELASTICSEARCH_USER}"
+  password: "${ELASTICSEARCH_PASSWORD}"
