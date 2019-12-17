@@ -2,10 +2,9 @@ server {
   listen 80;
   listen 443 ssl http2;
   server_name dribbble.woaiso.com;
-  ssl_certificate /data/ssl/woaiso.com/fullchain1.pem;
-  ssl_certificate_key /data/ssl/woaiso.com/privkey1.pem;
+  include /etc/nginx/sites-enabled/ssl_certificate_woaiso;
   location / {
-        root /data/www/dribbble;
+        root /usr/share/nginx/html/dribbble;
         # 用于配合 browserHistory使用
         try_files $uri $uri/ /index.html;
   }

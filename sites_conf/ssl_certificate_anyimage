@@ -1,0 +1,2 @@
+ssl_certificate /data/ssl/anyimage.xyz/fullchain1.pem;
+  ssl_certificate_key /data/ssl/anyimage.xyz/privkey1.pem;
