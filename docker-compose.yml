@@ -18,7 +18,9 @@ services:
   mongodb:
     container_name: api-mongodb
     hostname: mongodb
-    image: mongo
+    build:
+      context: "./mongodb"
+    restart: always
     volumes:
       - ./database:/data/db
     ports:
@@ -26,7 +28,7 @@ services:
     networks:
       - woaiso
     healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongo mongodb:27017/test --quiet 1
+      test: ["CMD", "docker-healthcheck"]
       interval: 10s
       timeout: 10s
       retries: 5
@@ -63,6 +65,11 @@ services:
       - '443:443'
     networks:
       - woaiso
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://nginx/server-status"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 5
   registry:
     container_name: registry-hub
     hostname: elasticsearch
