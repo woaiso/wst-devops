@@ -39,8 +39,8 @@ services:
     image: woaiso/docker-tengine:2.1.4
     volumes:
       - ./sites_conf:/etc/nginx/sites-enabled
-      - ./www:/data/www
-      - ./ssl:/data/ssl
+      - ./www:/usr/share/nginx/html
+      - ./ssl:/etc/nginx/key
       - ./logs/nginx:/var/log/nginx
     depends_on:
       - mongodb
