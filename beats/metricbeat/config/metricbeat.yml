@@ -6,8 +6,11 @@ metricbeat.config.modules:
     #All data indexed to Elasticsearch
 output.elasticsearch:
     hosts: ["elasticsearch:9200"]
+    index: "metricbeat-%{[agent.version]}-%{+yyyy.MM.dd}"
     username: "${ELASTICSEARCH_USER}"
     password: "${ELASTICSEARCH_PASSWORD}"
+    enabled: true #enabled
+
 logging.to_files: false
 setup.dashboards.enabled: true
 setup.kibana:

@@ -11,7 +11,7 @@
     - process
     - socket
   enabled: true
-  period: 10s
+  period: 30s
   processes: ['.*']
   cpu_ticks: true
   process.cgroups.enabled: true
