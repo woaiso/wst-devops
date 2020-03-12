@@ -1,0 +1,235 @@
+version: '3.7'
+services:
+  api:
+    container_name: api-service
+    hostname: api
+    image: woaiso/wst-service
+    depends_on:
+      - mongodb
+    ports:
+      - 7001:7001
+    links:
+      - mongodb
+    environment:
+      - PORT=7001
+    networks:
+      - woaiso
+
+  mongodb:
+    container_name: api-mongodb
+    hostname: mongodb
+    build:
+      context: "./mongodb"
+    restart: always
+    volumes:
+      - ./database:/data/db
+    ports:
+      - 27017:27017
+    networks:
+      - woaiso
+    healthcheck:
+      test: ["CMD", "docker-healthcheck"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+  image:
+    container_name: api-image
+    hostname: image
+    image: woaiso/wst-image
+    ports:
+      - 5000:5000
+    networks:
+      - woaiso
+  nginx:
+    container_name: nginx
+    hostname: nginx
+    image: woaiso/docker-tengine:2.1.4
+    volumes:
+      - ./sites_conf:/etc/nginx/sites-enabled
+      - ./www:/usr/share/nginx/html
+      - ./ssl:/etc/nginx/key
+      - ./logs/nginx:/var/log/nginx
+    depends_on:
+      - mongodb
+      - api
+      - image
+      - registry
+    links:
+      - api
+      - image
+      - registry
+      - kibana
+    ports:
+      - '80:80'
+      - '443:443'
+    networks:
+      - woaiso
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://nginx/server-status"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 5
+  # registry:
+  #   container_name: registry-hub
+  #   hostname: elasticsearch
+  #   image: registry:2
+  #   volumes:
+  #     - ./registry:/var/lib/registry
+  #   ports:
+  #     - 5001:5001
+  #   environment:
+  #     - REGISTRY_HTTP_ADDR=0.0.0.0:5001
+  #   networks:
+  #     - woaiso
+
+  #ELK
+  elasticsearch:
+    container_name: elasticsearch
+    hostname: elasticsearch
+    build:
+      context: elasticsearch/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    volumes:
+      - type: bind
+        source: ./elasticsearch/config/elasticsearch.yml
+        target: /usr/share/elasticsearch/config/elasticsearch.yml
+        read_only: true
+      - type: volume
+        source: elasticsearch
+        target: /usr/share/elasticsearch/data
+    ports:
+      - '9200:9200'
+      - '9300:9300'
+    #Healthcheck to confirm availability of ES. Other containers wait on this.
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'curl',
+          '-s',
+          '-f',
+          '-u',
+          'elastic:${ES_PASSWORD}',
+          'http://localhost:9200/_cat/health',
+        ]
+    environment:
+      ES_JAVA_OPTS: '-Xmx256m -Xms256m'
+      ELASTIC_PASSWORD: ${ES_PASSWORD}
+    networks:
+      - woaiso
+  logstash:
+    container_name: logstash
+    hostname: logstash
+    build:
+      context: logstash/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    volumes:
+      - type: bind
+        source: ./logstash/config/logstash.yml
+        target: /usr/share/logstash/config/logstash.yml
+        read_only: true
+      - type: bind
+        source: ./logstash/pipeline
+        target: /usr/share/logstash/pipeline
+        read_only: true
+    ports:
+      - '4000:5000'
+      - '9600:9600'
+    environment:
+      - 'LS_JAVA_OPTS=-Xmx256m -Xms256m'
+      - 'ELASTICSEARCH_USER=${ES_USER}'
+      - 'ELASTICSEARCH_PASSWORD=${ES_PASSWORD}'
+    networks:
+      - woaiso
+    depends_on:
+      - elasticsearch
+  kibana:
+    container_name: kibana
+    hostname: kibana
+    build:
+      context: kibana/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    volumes:
+      - type: bind
+        source: ./kibana/config/kibana.yml
+        target: /usr/share/kibana/config/kibana.yml
+        read_only: true
+    ports:
+      - '5601:5601'
+    networks:
+      - woaiso
+    depends_on:
+      - elasticsearch
+    restart: on-failure
+    environment:
+      - 'ELASTICSEARCH_USER=${ES_USER}'
+      - 'ELASTICSEARCH_PASSWORD=${ES_PASSWORD}'
+    healthcheck:
+      test: ['CMD', 'curl', '-s', '-f', 'http://localhost:5601/login']
+      retries: 6
+  filebeat:
+    container_name: filebeat
+    hostname: filebeat
+    user: root
+    build:
+      context: beats/filebeat/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    command: filebeat -e -E output.elasticsearch.username=${ES_USER} -E output.elasticsearch.password=${ES_PASSWORD} -strict.perms=false
+    volumes:
+      #Mount the filebeat configuration readonly
+      - ./beats/filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      #Mount the docker logs for indexing by the custom prospector ./config/filebeat/prospectors.d
+      - /var/lib/docker/containers:/var/lib/docker/containers
+      #Mount the nginx logs into the filebeat container so we can access and index them using the filebeat nginx module
+      - ./logs/nginx/:/var/log/nginx/
+    networks:
+      - woaiso
+    depends_on:
+      #wait for the these services to come up. This ensures the logs are available and ES exists for indexing
+      - elasticsearch
+      - nginx
+    restart: on-failure
+    environment:
+      - 'ELASTICSEARCH_USER=${ES_USER}'
+      - 'ELASTICSEARCH_PASSWORD=${ES_PASSWORD}'
+
+  # MetricBeat
+  metricbeat:
+    container_name: metricbeat
+    hostname: metricbeat
+    user: root
+    build:
+      context: beats/metricbeat/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    volumes:
+      - ./beats/metricbeat/config/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro
+      - ./beats/metricbeat/config/modules.d/:/usr/share/metricbeat/modules.d/
+      - /proc:/hostfs/proc:ro
+      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
+      #Allows us to report on docker from the hosts information
+      - /var/run/docker.sock:/var/run/docker.sock
+      #We mount the host filesystem so we can report on disk usage with the system module
+      - /:/hostfs:ro
+    command: metricbeat -e -system.hostfs=/hostfs -E output.elasticsearch.username=${ES_USER} -E output.elasticsearch.password=${ES_PASSWORD} -strict.perms=false
+    networks:
+      - woaiso
+    restart: on-failure
+    depends_on:
+      #wait for the these services to come up. This ensures the logs are available and ES exists for indexing
+      - elasticsearch
+      - nginx
+    environment:
+      - 'ELASTICSEARCH_USER=${ES_USER}'
+      - 'ELASTICSEARCH_PASSWORD=${ES_PASSWORD}'
+networks:
+  woaiso:
+    driver: bridge
+
+volumes:
+  elasticsearch:

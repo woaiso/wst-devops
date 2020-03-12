@@ -1,0 +1,2 @@
+ssl_certificate /etc/nginx/key/anyimage.xyz/fullchain1.pem;
+ssl_certificate_key /etc/nginx/key/anyimage.xyz/privkey1.pem;
