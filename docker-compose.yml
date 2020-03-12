@@ -1,78 +1,86 @@
 version: '3.7'
 services:
-  api:
-    container_name: api-service
-    hostname: api
-    image: woaiso/wst-service
-    depends_on:
-      - mongodb
-    ports:
-      - 7001:7001
-    links:
-      - mongodb
-    environment:
-      - PORT=7001
-    networks:
-      - woaiso
+    api:
+        container_name: api-service
+        hostname: api
+        image: woaiso/wst-service
+        depends_on:
+            - mongodb
+        ports:
+            - 7001:7001
+        links:
+            - mongodb
+        environment:
+            - PORT=7001
+        networks:
+            - woaiso
 
-  mongodb:
-    container_name: api-mongodb
-    hostname: mongodb
-    build:
-      context: "./mongodb"
-    restart: always
-    volumes:
-      - ./database:/data/db
-    ports:
-      - 27017:27017
-    networks:
-      - woaiso
-    healthcheck:
-      test: ["CMD", "docker-healthcheck"]
-      interval: 10s
-      timeout: 10s
-      retries: 5
-      start_period: 40s
-  image:
-    container_name: api-image
-    hostname: image
-    image: woaiso/wst-image
-    ports:
-      - 5000:5000
-    networks:
-      - woaiso
-  nginx:
-    container_name: nginx
-    hostname: nginx
-    image: woaiso/docker-tengine:2.1.4
-    volumes:
-      - ./sites_conf:/etc/nginx/sites-enabled
-      - ./www:/usr/share/nginx/html
-      - ./ssl:/etc/nginx/key
-      - ./logs/nginx:/var/log/nginx
-    depends_on:
-      - mongodb
-      - api
-      - image
-      - registry
-    links:
-      - api
-      - image
-      - registry
-      - kibana
-    ports:
-      - '80:80'
-      - '443:443'
-    networks:
-      - woaiso
-    healthcheck:
-      test: ["CMD", "curl", "--fail", "http://nginx/server-status"]
-      interval: 1m30s
-      timeout: 10s
-      retries: 5
+    mongodb:
+        container_name: api-mongodb
+        hostname: mongodb
+        build:
+            context: './mongodb'
+        restart: always
+        volumes:
+            - ./database:/data/db
+        ports:
+            - 27017:27017
+        networks:
+            - woaiso
+        healthcheck:
+            test: ['CMD', 'docker-healthcheck']
+            interval: 10s
+            timeout: 10s
+            retries: 5
+            start_period: 40s
+    # 图片服务
+    image:
+        container_name: api-image
+        hostname: image
+        image: woaiso/wst-image
+        ports:
+            - 5000:5000
+        networks:
+            - woaiso
+    # 文件接收服务
+    transfer:
+        container_name: transfer
+        image: node:alpine
+        ports:
+            - 8081:8081
+        volumes:
+            - ./transfer:/home/node/app
+        working_dir: /home/node/app
+        command:
+            - 'server.js'
+    nginx:
+        container_name: nginx
+        hostname: nginx
+        image: woaiso/docker-tengine:2.1.4
+        volumes:
+            - ./sites_conf:/etc/nginx/sites-enabled
+            - ./www:/usr/share/nginx/html
+            - ./ssl:/etc/nginx/key
+            - ./logs/nginx:/var/log/nginx
+        depends_on:
+            - mongodb
+            - api
+            - image
+            - transfer
+        links:
+            - api
+            - image
+            - transfer
+        ports:
+            - '80:80'
+            - '443:443'
+        networks:
+            - woaiso
+        healthcheck:
+            test: ['CMD', 'curl', '--fail', 'http://nginx/server-status']
+            interval: 1m30s
+            timeout: 10s
+            retries: 5
 networks:
-  woaiso:
-    driver: bridge
-
-volumes:
-  elasticsearch:
+    woaiso:
+        driver: bridge
