@@ -45,14 +45,12 @@ services:
     # 文件接收服务
     transfer:
         container_name: transfer
-        image: node:alpine
+        build:
+            context: './transfer'
+        networks:
+            - woaiso
         ports:
             - 8081:8081
-        volumes:
-            - ./transfer:/home/node/app
-        working_dir: /home/node/app
-        command:
-            - 'server.js'
     nginx:
         container_name: nginx
         hostname: nginx
