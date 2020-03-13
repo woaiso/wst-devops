@@ -2,8 +2,8 @@ server {
   listen 80;
   listen 443 ssl http2;
   server_name jhz.woaiso.xyz;
-  ssl_certificate /data/ssl/woaiso.xyz/fullchain1.pem;
-  ssl_certificate_key /data/ssl/woaiso.xyz/privkey1.pem;
+  ssl_certificate /etc/nginx/key/woaiso.xyz/fullchain1.pem;
+  ssl_certificate_key /etc/nginx/key/woaiso.xyz/privkey1.pem;
   location / {
         root /data/www/jhz;
         # 用于配合 browserHistory使用

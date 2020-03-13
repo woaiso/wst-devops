@@ -12,6 +12,7 @@ services:
             - mongodb
         environment:
             - PORT=7001
+            - MONGO_URL=mongodb://mongodb:27017/wst
         networks:
             - woaiso
 
