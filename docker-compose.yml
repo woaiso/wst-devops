@@ -55,7 +55,7 @@ services:
     nginx:
         container_name: nginx
         hostname: nginx
-        image: woaiso/docker-tengine:2.1.4
+        image: woaiso/docker-tengine:2.1.5
         volumes:
             - ./sites_conf:/etc/nginx/sites-enabled
             - ./www:/usr/share/nginx/html
