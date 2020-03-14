@@ -5,7 +5,7 @@ server {
   ssl_certificate /etc/nginx/key/woaiso.xyz/fullchain1.pem;
   ssl_certificate_key /etc/nginx/key/woaiso.xyz/privkey1.pem;
   location / {
-        root /data/www/jhz;
+        root /usr/share/nginx/html/jhz;
         # 用于配合 browserHistory使用
         try_files $uri $uri/ /index.html;
   }
