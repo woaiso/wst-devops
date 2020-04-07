@@ -4,6 +4,7 @@ server {
   server_name www.woaiso.xyz woaiso.xyz;
   ssl_certificate /etc/nginx/key/woaiso.xyz/fullchain1.pem;
   ssl_certificate_key /etc/nginx/key/woaiso.xyz/privkey1.pem;
+  error_page 497  https://$host$uri?$args;
   location / {
         root /usr/share/nginx/html/www;
   }
