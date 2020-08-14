@@ -1,8 +1,9 @@
 server {
   listen 80;
-  server_name image.woaiso.com xia.woaiso.com;
-  rewrite ^(.*)$    https://anyimage.xyz$1 permanent;
+  server_name image.woaiso.com xia.woaiso.com anyimage.woaiso.xyz;
+  rewrite ^(.*)$    https://$host$1    permanent;
 }
+
 server {
   listen 443 ssl http2;
   server_name image.woaiso.com xia.woaiso.com;
@@ -11,18 +12,13 @@ server {
 }
 
 server {
-  listen 80;
-  server_name anyimage.xyz;
-  rewrite ^(.*)$    https://$host$1    permanent;
-}
-
-server {
   listen 443 ssl http2;
-  server_name anyimage.xyz;
-  include /etc/nginx/sites-enabled/ssl_certificate_anyimage;
+  server_name anyimage.woaiso.xyz;
+  ssl_certificate /etc/nginx/key/woaiso.xyz/fullchain1.pem;
+  ssl_certificate_key /etc/nginx/key/woaiso.xyz/privkey1.pem;
   root /usr/share/nginx/html/anyimage;
   index index.html;
-  location /api {
+  location /x {
     proxy_pass http://image:5000;
     proxy_set_header   X-Forwarded-Proto $scheme;
     proxy_set_header   Host              $http_host;
