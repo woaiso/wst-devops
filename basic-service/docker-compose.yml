@@ -5,6 +5,7 @@ services:
         volumes:
             - ./sites_conf:/etc/nginx/
             - ./ssl:/etc/nginx/key
+            - ./www:/etc/nginx/html
             - ./logs/nginx:/var/log/nginx
         links:
             - mysql
