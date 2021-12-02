@@ -10,6 +10,7 @@ services:
             - ./logs/nginx:/var/log/nginx
         links:
             - mysql
+            - redis
         ports:
             - '443:443'
             - '3307:3307'
