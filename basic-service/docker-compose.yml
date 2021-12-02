@@ -3,7 +3,7 @@ services:
     nginx:
         image: woaiso/docker-tengine:2.1.5
         volumes:
-            - ./sites_conf:/etc/nginx/sites-enabled
+            - ./sites_conf:/etc/nginx/
             - ./ssl:/etc/nginx/key
             - ./logs/nginx:/var/log/nginx
         links:
