@@ -25,6 +25,7 @@ services:
             - 'MYSQL_PASSWORD=${MYSQL_PASSWORD}'
     redis:
         image: 'redis:5.0.14'
+        command: --requirepass $REDIS_PASSWORD --appendonly=yes
         volumes:
             - ./redis:/data
         ports:
