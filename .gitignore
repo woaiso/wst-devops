@@ -5,3 +5,4 @@ registry/
 logs/
 mysql/
 redis/
+.env
