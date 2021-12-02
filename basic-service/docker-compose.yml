@@ -13,7 +13,7 @@ services:
             - '3307:3306'
     redis:
         image: 'redis:5.0.14'
-        command: --requirepass $REDIS_PASSWORD --appendonly=yes
+        command: --requirepass $REDIS_PASSWORD --appendonly yes
         volumes:
             - ./redis:/data
         ports:
