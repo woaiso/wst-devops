@@ -1,20 +1,5 @@
 version: '3.9'
 services:
-    nginx:
-        image: woaiso/docker-tengine:2.1.5
-        volumes:
-            - ./sites_conf:/etc/nginx/conf.d
-            - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-            - ./ssl:/etc/nginx/key
-            - ./www:/etc/nginx/html
-            - ./logs/nginx:/var/log/nginx
-        links:
-            - mysql
-            - redis
-        ports:
-            - '443:443'
-            - '3307:3307'
-            - '6380:6380'
     mysql:
         image: mysql:5.7
         command: --default-authentication-plugin=mysql_native_password
@@ -24,10 +9,12 @@ services:
             - 'MYSQL_DATABASE=${MYSQL_DATABASE}'
             - 'MYSQL_USER=${MYSQL_USER}'
             - 'MYSQL_PASSWORD=${MYSQL_PASSWORD}'
+        ports:
+            - '3307:3306'
     redis:
         image: 'redis:5.0.14'
         command: --requirepass $REDIS_PASSWORD --appendonly=yes
         volumes:
             - ./redis:/data
         ports:
-            - 6379:6379
+            - '6380:6379'
