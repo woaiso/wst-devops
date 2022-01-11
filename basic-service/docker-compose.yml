@@ -12,14 +12,14 @@ services:
             - 'MYSQL_USER=${MYSQL_USER}'
             - 'MYSQL_PASSWORD=${MYSQL_PASSWORD}'
         ports:
-            - '3306:3306'
+            - '3307:3306'
     redis:
         image: 'redis:5.0.14'
         command: --requirepass $REDIS_PASSWORD --appendonly yes
         volumes:
             - ./redis:/data
         ports:
-            - '6379:6379'
+            - '6380:6379'
     mongo:
         image: 'mongo:5.0.5'
         restart: always
@@ -29,4 +29,4 @@ services:
             - 'MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}'
             - 'MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}'
         ports:
-            - '27017:27017'
+            - '27018:27017'
