@@ -35,12 +35,16 @@ services:
         image: 'shark-server:latest'
         restart: always
         volumes:
-          - './shark-server/.env:/usr/src/app/dist/.env'
+            - type: bind
+              source: ./shark-server/.env
+              target: /usr/src/app/dist/.env
     nginx:
         image: 'woaiso/docker-tengine:2.1.5'
         restart: always
         volumes:
-            - './nginx/nginx.conf:/etc/nginx/nginx.conf'
+            - type: bind
+              source: ./nginx/nginx.conf
+              target: /etc/nginx/nginx.conf
             - ./sites_conf:/etc/nginx/sites-enabled
             - ./www:/usr/share/nginx/html
             - ./ssl:/etc/nginx/key
@@ -49,7 +53,7 @@ services:
             - '80:80'
             - '443:443'
         healthcheck:
-                test: ['CMD', 'curl', '--fail', 'http://nginx/server-status']
-                interval: 1m30s
-                timeout: 10s
-                retries: 5
+            test: ['CMD', 'curl', '--fail', 'http://nginx/server-status']
+            interval: 1m30s
+            timeout: 10s
+            retries: 5
