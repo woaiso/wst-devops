@@ -37,7 +37,7 @@ services:
         volumes:
             - type: bind
               source: ./shark-server/.env
-              target: /usr/src/app/dist/.env
+              target: /usr/src/app/.env
     nginx:
         image: 'woaiso/docker-tengine:2.1.5'
         restart: always
