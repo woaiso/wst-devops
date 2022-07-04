@@ -66,9 +66,9 @@ services:
             - ./www:/usr/share/nginx/html
             - ./ssl:/etc/nginx/key
             - ./logs/nginx:/var/log/nginx
-        ports:
-            - '80:80'
-            - '443:443'
+        # ports:
+        #     - '80:80'
+        #     - '443:443'
         healthcheck:
             test: ['CMD', 'curl', '--fail', 'http://nginx/server-status']
             interval: 1m30s
