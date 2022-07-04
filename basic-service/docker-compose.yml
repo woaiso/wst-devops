@@ -47,6 +47,8 @@ services:
             context: ./../../zhibo-shark
             dockerfile: Dockerfile
         restart: always
+        ports:
+            - '3000:3000'
         volumes:
             - /etc/localtime:/etc/localtime
             - type: bind
