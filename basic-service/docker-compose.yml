@@ -79,3 +79,14 @@ services:
             interval: 1m30s
             timeout: 10s
             retries: 5
+    openvpn:
+        image: 'kylemanna/openvpn'
+        container_name: openvpn
+        restart: always
+        volumes:
+            - /etc/localtime:/etc/localtime
+            - ./openvpn:/etc/openvpn
+        ports:
+            - 1295:1194/udp
+        cap_add:
+            - NET_ADMIN

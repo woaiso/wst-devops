@@ -7,3 +7,4 @@ mysql/
 redis/
 mongo/
 .env
+openvpn/
