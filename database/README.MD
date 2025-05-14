@@ -1,1 +1,0 @@
-# for store database directory
