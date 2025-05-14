@@ -1,0 +1,10 @@
+services:
+    casdoor:
+        image: casbin/casdoor:latest
+        container_name: casdoor
+        environment:
+            RUNNING_IN_DOCKER: 'true'
+        volumes:
+            - ./conf:/conf
+        ports:
+            - '${CASDOOR_PORT}:8000'
