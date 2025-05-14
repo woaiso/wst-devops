@@ -8,3 +8,5 @@ redis/
 mongo/
 .env
 openvpn/
+
+middleware/volumes/*

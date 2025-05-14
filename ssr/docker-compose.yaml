@@ -1,0 +1,9 @@
+services:
+    subconverter:
+        image: tindy2013/subconverter:latest
+        container_name: subconverter
+        volumes:
+            - ${HOME}/projects/subconverter/base:/base
+        ports:
+            - '15051:25500'
+        restart: always
